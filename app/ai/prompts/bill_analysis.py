@@ -103,7 +103,7 @@ def build_bill_analysis_prompt(bill: str) -> str:
     Combines all prompt components into one final prompt string.
 
     Args:
-        bill_json (dict): The bill data
+        bill (dict): The bill data
 
     Returns:
         str: Final prompt string ready for LLM
@@ -115,5 +115,5 @@ def build_bill_analysis_prompt(bill: str) -> str:
         sector=SECTOR_IMPACT_PROMPT.strip(),
         risk=RISK_FLAGS_PROMPT.strip(),
         participation=PUBLIC_PARTICIPATION_PROMPT.strip(),
-        bill_json=bill.strip(),
+        bill=bill.strip(),
     )
