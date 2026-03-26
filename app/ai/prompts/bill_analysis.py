@@ -1,34 +1,32 @@
-from typing import Dict, Any
-import json
+"""
+app/ai/prompts/bill_analysis.py
+--------------------------------
+Versioned prompt templates for bill analysis.
+Each dimension has its own constant; BILL_ANALYSIS_PROMPT
+assembles them into the final LLM prompt via build_bill_analysis_prompt().
+"""
 
-
-# =========================
-# VERSION TAG (important for tracking)
-# =========================
 PROMPT_VERSION = "v1.0"
 
 
-# =========================
-# PROMPT COMPONENTS
-# =========================
+# ── Field-level instructions ──────────────────────────────────────────────────
 
 SUMMARY_PROMPT = """
 Summary
 Explain the bill in plain English as if speaking to an informed non-lawyer.
-Max 5 sentences, active voice, under 150 words total.
+Use active voice and provide a comprehensive overview.
 Answer: What does this bill do? Why was it introduced? What changes?
 """
 
 ECONOMIC_IMPACT_PROMPT = """
 Economic Impact
-Describe who gains, who bears costs, and how.
-Mention fiscal effects: revenue, spending, taxes, compliance costs.
-Keep to 2-3 concise sentences.
+Describe who gains, who bears costs, and how comprehensively.
+Mention all fiscal effects: revenue, spending, taxes, compliance costs, and economic implications.
 """
 
 SECTOR_IMPACT_PROMPT = """
 Sector Impact
-List only sectors explicitly mentioned or directly affected.
+List all sectors explicitly mentioned or directly affected.
 Use lowercase, singular form.
 Return as a JSON array.
 Return [] if none.
@@ -36,8 +34,8 @@ Return [] if none.
 
 RISK_FLAGS_PROMPT = """
 Risk Flags
-Identify concerns: implementation challenges, unintended consequences, equity issues.
-Use short phrases (max 5 words each).
+Identify all concerns: implementation challenges, unintended consequences, equity issues, and potential risks.
+Use clear phrases to describe each concern.
 Return as a JSON array.
 Return [] if none.
 """
@@ -50,9 +48,9 @@ Do not infer.
 """
 
 
-# =========================
-# MASTER PROMPT TEMPLATE
-# =========================
+# ── Master template ───────────────────────────────────────────────────────────
+# NOTE: uses {{}} for literal braces in the JSON schema example so that
+# .format() does not treat them as substitution targets.
 
 BILL_ANALYSIS_PROMPT = """
 You are a senior legal and policy analyst.
@@ -62,7 +60,7 @@ Analyze the provided bill and generate structured output matching the AIInsight 
 
 Output Requirements:
 - Return ONLY valid JSON
-- No markdown, no explanations
+- No markdown, no explanations outside the JSON
 - Follow this schema exactly:
 
 {{
@@ -74,8 +72,8 @@ Output Requirements:
 }}
 
 Rules:
-- If missing info → use null or empty arrays
-- Do NOT infer
+- If information is missing or unclear → use null or empty arrays
+- Do NOT infer — only use what is explicitly stated in the bill
 - Keep responses concise and factual
 
 Field Instructions:
@@ -89,31 +87,28 @@ Field Instructions:
 
 {participation}
 
-Bill JSON:
+Bill Text:
 {bill}
 """
 
 
-# =========================
-# BUILDER FUNCTION
-# =========================
+# ── Builder ───────────────────────────────────────────────────────────────────
 
 def build_bill_analysis_prompt(bill: str) -> str:
     """
-    Combines all prompt components into one final prompt string.
+    Assemble all prompt components into the final prompt string.
 
     Args:
-        bill_json (dict): The bill data
+        bill: Raw bill text extracted by the parser service.
 
     Returns:
-        str: Final prompt string ready for LLM
+        Fully formatted prompt string ready to send to the LLM.
     """
-
     return BILL_ANALYSIS_PROMPT.format(
         summary=SUMMARY_PROMPT.strip(),
         economic=ECONOMIC_IMPACT_PROMPT.strip(),
         sector=SECTOR_IMPACT_PROMPT.strip(),
         risk=RISK_FLAGS_PROMPT.strip(),
         participation=PUBLIC_PARTICIPATION_PROMPT.strip(),
-        bill_json=bill.strip(),
+        bill=bill.strip(),  # fixed: was bill_json=, but template key is {bill}
     )
