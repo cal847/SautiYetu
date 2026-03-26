@@ -21,6 +21,16 @@ class Settings(BaseSettings):
     # App
     log_level: str = "INFO"
 
+    # CORS
+    cors_origins: list[str] = ["http://localhost:3000", "http://localhost:8000"]
+    cors_allow_credentials: bool = True
+    cors_allow_methods: list[str] = ["*"]
+    cors_allow_headers: list[str] = ["*"]
+
+    # Project
+    project_name: str = "SautiYetu"
+    version: str = "0.1.0"
+
     class Config:
         env_file = ".env"
         case_sensitive = False
