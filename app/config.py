@@ -1,4 +1,6 @@
+# app/config.py
 from pydantic_settings import BaseSettings
+from typing import List, Optional # Import Optional if needed for defaults
 
 
 class Settings(BaseSettings):
@@ -7,8 +9,13 @@ class Settings(BaseSettings):
     db_echo: bool = False
 
     # DeepInfra
-    deepinfra_api_key: str = ""
+    # Removed duplicate, using the one with default
+    deepinfra_api_key: str = ""  
     deepinfra_model: str = "meta-llama/Meta-Llama-3.1-70B-Instruct"
+    
+    # Add the field that was causing the validation error if it's needed
+    # Or remove it if it's not actually used anywhere else
+    deepinfra_api_url: str = "https://api.deepinfra.com/" # Add this if the error was about this field
 
     # Africa's Talking
     at_username: str = ""
@@ -21,22 +28,18 @@ class Settings(BaseSettings):
     # App
     log_level: str = "INFO"
 
-<<<<<<< HEAD
-=======
     # CORS
-    cors_origins: list[str] = ["http://localhost:3000", "http://localhost:8000"]
+    cors_origins: List[str] = ["http://localhost:3000", "http://localhost:8000"]
     cors_allow_credentials: bool = True
-    cors_allow_methods: list[str] = ["*"]
-    cors_allow_headers: list[str] = ["*"]
+    cors_allow_methods: List[str] = ["*"]
+    cors_allow_headers: List[str] = ["*"]
 
     # Project
     project_name: str = "SautiYetu"
     version: str = "0.1.0"
 
-    class Config:
-        env_file = ".env"
-        case_sensitive = False
+    # Using model_config for Pydantic v2
+    model_config = {"env_file": ".env", "case_sensitive": False}
 
->>>>>>> a1402789bc57b8fd4cdfae71d0567f78e2f049b6
 
 settings = Settings()
